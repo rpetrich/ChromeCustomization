@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>title</key>
+  <string>ChromeCustomization</string>
+  <key>entry</key>
+  <dict>
+    <key>cell</key>
+    <string>PSLinkCell</string>
+    <key>icon</key>
+    <string>/Applications/Preferences.app/Safari.png</string>
+    <key>label</key>
+    <string>ChromeCustomization</string>
+  </dict>
+  <key>items</key>
+  <array>
+    <dict>
+      <key>cell</key>
+      <string>PSGroupCell</string>
+    </dict>
+    <dict>
+      <key>cell</key>
+      <string>PSLinkListCell</string>
+      <key>default</key>
+      <integer>0</integer>
+      <key>defaults</key>
+      <string>com.rpetrich.chromecustomization</string>
+      <key>key</key>
+      <string>CCSwipeStyle</string>
+      <key>label</key>
+      <string>Swipe Style</string>
+      <key>PostNotification</key>
+      <string>com.rpetrich.chromecustomization.settingschanged</string>
+      <key>detail</key>
+      <string>PSListItemsController</string>
+      <key>validValues</key>
+      <array>
+        <integer>0</integer>
+        <integer>1</integer>
+        <integer>2</integer>
+      </array>
+      <key>validTitles</key>
+      <array>
+        <string>Default</string>
+        <string>Quick (iPad-style)</string>
+        <string>Detailed (iPhone-style)</string>
+      </array>
+    </dict>
+    <dict>
+      <key>cell</key>
+      <string>PSGroupCell</string>
+      <key>label</key>
+      <string>Read Later JavaScript</string>
+      <key>footerText</key>
+      <string>JavaScript to run when the "Read Later" menu item is pressed</string>
+    </dict>
+    <dict>
+      <key>cell</key>
+      <string>PSEditTextViewCell</string>
+      <key>default</key>
+      <string></string>
+      <key>defaults</key>
+      <string>com.rpetrich.chromecustomization</string>
+      <key>key</key>
+      <string>CCReadLaterJavaScript</string>
+      <key>PostNotification</key>
+      <string>com.rpetrich.chromecustomization.settingschanged</string>
+      <key>noAutoCorrect</key>
+      <true/>
+    </dict>
+    <dict>
+      <key>cell</key>
+      <string>PSGroupCell</string>
+      <key>footerText</key>
+      <string>© 2012 Ryan Petrich</string>
+    </dict>
+  </array>
+</dict>
+</plist>
