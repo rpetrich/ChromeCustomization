@@ -1,4 +1,5 @@
 #import <UIKit/UIKit2.h>
+#import <CaptainHook/CaptainHook.h>
 
 @interface BrowserViewController : UIViewController
 @property (nonatomic, retain) UIView *contentArea;
@@ -135,14 +136,23 @@ static inline id CCSettingValue(NSString *key)
 			MainController *mc = (MainController *)UIApp.delegate;
 			BrowserViewController *bvc = mc.activeBVC;
 			UIView *contentArea = bvc.contentArea;
-			[contentArea.superview bringSubviewToFront:contentArea];
+			UIViewController **toolbarController_ = CHIvarRef(bvc, toolbarController_, UIViewController *);
+			// Technically we're reaching into a private c++ class inside an ivar. very ugly, but it works
+			UIView *toolbarView = toolbarController_ ? (*toolbarController_).view : nil;
 			if (UIApp.statusBarHidden) {
 				[UIApp setStatusBarHidden:NO withAnimation:UIStatusBarAnimationSlide];
 				bvc.wantsFullScreenLayout = NO;
 				[UIView animateWithDuration:0.5 animations:^{
 					UIView *view = bvc.view;
 					view.frame = [UIScreen mainScreen].applicationFrame;
-					[bvc didRotateFromInterfaceOrientation:bvc.interfaceOrientation];
+					CGFloat height = toolbarView.frame.size.height;
+					CGRect frame = view.bounds;
+					frame.origin.y += height - 2.0f;
+					frame.size.height -= height - 2.0f;
+					contentArea.frame = frame;
+					frame.origin.y = 0.0f;
+					frame.size.height = height;
+					toolbarView.frame = frame;
 				}];
 			} else {
 				[UIApp setStatusBarHidden:YES withAnimation:UIStatusBarAnimationSlide];
@@ -151,6 +161,9 @@ static inline id CCSettingValue(NSString *key)
 					UIView *view = bvc.view;
 					view.frame = [UIScreen mainScreen].bounds;
 					contentArea.frame = view.bounds;
+					CGRect frame = toolbarView.frame;
+					frame.origin.y -= frame.size.height - 2.0f;
+					toolbarView.frame = frame;
 				}];
 			}
 			id<ToolsPopupTableDelegate> delegate = self.delegate;
