@@ -77,6 +77,7 @@ Detailed side swipes show page titles and track your finger</string>
       <string>PSGroupCell</string>
       <key>footerText</key>
       <string>Swipe up on tab to close
+Swipe left on page to go back, right on page to go forward
 
 © 2012 Ryan Petrich</string>
     </dict>
