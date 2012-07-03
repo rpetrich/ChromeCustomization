@@ -125,7 +125,11 @@ static inline id CCSettingValue(NSString *key)
 	switch (item.tag) {
 		case -1: {
 			MainController *mc = (MainController *)UIApp.delegate;
-			[mc.activeBVC loadJavascriptFromLocationBar:CCSettingValue(@"CCReadLaterJavaScript")];
+			NSString *javascript = CCSettingValue(@"CCReadLaterJavaScript");
+			if ([javascript hasPrefix:@"javascript:"]) {
+				javascript = [javascript substringFromIndex:11];
+			}
+			[mc.activeBVC loadJavascriptFromLocationBar:javascript];
 			id<ToolsPopupTableDelegate> delegate = self.delegate;
 			if ([delegate respondsToSelector:@selector(tappedBehindPopup:)])
 				[delegate tappedBehindPopup:self];
