@@ -47,8 +47,39 @@
 @property (nonatomic,retain) UIWindow *window; 
 @end
 
+@interface ToolbarController : NSObject
+@end
+
+@interface WebToolbarController : ToolbarController
+@property (nonatomic, retain) UIView *webToolbar;
+@property (nonatomic, retain) UIButton *backButton;
+@property (nonatomic, retain) UIButton *forwardButton;
+@property (nonatomic, retain) UIButton *reloadButton;
+@property (nonatomic, retain) UIButton *stopButton;
+@property (nonatomic, retain) UIButton *starButton;
+@property (nonatomic, retain) UIButton *voiceSearchButton;
+@property (nonatomic, retain) UIButton *cancelButton;
+@property (nonatomic, retain) UIImageView *view;
+@property (nonatomic, retain) UIImageView *backgroundView;
+@property (nonatomic, assign) int style;
+@property (nonatomic, retain) UIButton *toolsMenuButton;
+@property (nonatomic, retain) UIButton *stackButton;
+@end
+
+
 @interface _UIWebViewScrollView : UIScrollView
 @end
+
+@interface UIScrollViewPanGestureRecognizer : UIPanGestureRecognizer
+@property (assign, nonatomic) UIScrollView *scrollView;
+- (void)_centroidMovedTo:(CGPoint)point atTime:(NSTimeInterval)time;
+@end
+
+@interface TabView : UIControl
+@property (nonatomic, readonly) UIButton *closeButton;
+@end
+
+#define kNavigationGestureThreshold 30.0f
 
 static inline id CCSettingValue(NSString *key)
 {
@@ -126,7 +157,11 @@ static inline id CCSettingValue(NSString *key)
 	switch (item.tag) {
 		case -1: {
 			MainController *mc = (MainController *)UIApp.delegate;
-			[mc.activeBVC loadJavascriptFromLocationBar:CCSettingValue(@"CCReadLaterJavaScript")];
+			NSString *javascript = CCSettingValue(@"CCReadLaterJavaScript");
+			if ([javascript hasPrefix:@"javascript:"]) {
+				javascript = [javascript substringFromIndex:11];
+			}
+			[mc.activeBVC loadJavascriptFromLocationBar:javascript];
 			id<ToolsPopupTableDelegate> delegate = self.delegate;
 			if ([delegate respondsToSelector:@selector(tappedBehindPopup:)])
 				[delegate tappedBehindPopup:self];
@@ -178,16 +213,131 @@ static inline id CCSettingValue(NSString *key)
 
 %end
 
+static BOOL allowBackGesture;
+static BOOL allowForwardGesture;
+
+@interface UIScrollView (chromeCustomization)
+- (void)chromeCustomization_updateBackForwardUI;
+@end
+
+@implementation UIScrollView (chromeCustomization)
+- (void)chromeCustomization_updateBackForwardUI
+{
+}
+@end
+
 %hook _UIWebViewScrollView
+
+- (id)initWithFrame:(CGRect)frame
+{
+	if ((self = %orig())) {
+		self.alwaysBounceHorizontal = YES;
+	}
+	return self;
+}
+
+- (void)chromeCustomization_updateBackForwardUI
+{
+	%orig();
+	UIWebView *webView = (UIWebView *)self.superview;
+	if ([webView isKindOfClass:[UIWebView class]]) {
+		CATransform3D transform = CATransform3DIdentity;
+		transform.m34 = 1.0 / -800;
+		CGPoint offset = self.contentOffset;
+		if (allowBackGesture && (offset.x < - kNavigationGestureThreshold)) {
+			transform = CATransform3DRotate(transform, -10.0f * M_PI / 180.0f, 0.0f, 1.0f, 0.0f);
+		} else if (allowForwardGesture && (offset.x > self.contentSize.width - self.bounds.size.width + kNavigationGestureThreshold)) {
+			transform = CATransform3DRotate(transform, 10.0f * M_PI / 180.0f, 0.0f, 1.0f, 0.0f);
+		}
+		CALayer *layer = self.layer;
+		CATransform3D currentTransform = layer.sublayerTransform;
+		if (!CATransform3DEqualToTransform(currentTransform, transform)) {
+			layer.sublayerTransform = transform;
+			CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"sublayerTransform"];
+			animation.fromValue = [NSValue valueWithCATransform3D:currentTransform];
+			animation.toValue = [NSValue valueWithCATransform3D:transform];
+			animation.duration = 0.2;
+			animation.removedOnCompletion = YES;
+			[layer addAnimation:animation forKey:@"sublayerTransform"];
+		}
+	}
+}
 
 - (void)_endPanWithEvent:(id)event
 {
 	%orig();
-	if (self.contentOffset.y < 0.0f) {
+	CGPoint offset = self.contentOffset;
+	UIWebView *webView = (UIWebView *)self.superview;
+	if ([webView isKindOfClass:[UIWebView class]]) {
 		MainController *mc = (MainController *)UIApp.delegate;
 		BrowserViewController *bvc = mc.activeBVC;
-		if (bvc.wantsFullScreenLayout) {
-			[bvc showToolsMenuPopup];
+		WebToolbarController **toolbarController_ = CHIvarRef(bvc, toolbarController_, WebToolbarController *);
+		if (allowBackGesture && (offset.x < - kNavigationGestureThreshold)) {
+			[(*toolbarController_).backButton sendActionsForControlEvents:UIControlEventTouchUpInside];
+		} else if (allowForwardGesture && (offset.x > self.contentSize.width - self.bounds.size.width + kNavigationGestureThreshold)) {
+			[(*toolbarController_).forwardButton sendActionsForControlEvents:UIControlEventTouchUpInside];
+		} else if (offset.y < 0.0f) {
+			MainController *mc = (MainController *)UIApp.delegate;
+			BrowserViewController *bvc = mc.activeBVC;
+			if (bvc.wantsFullScreenLayout) {
+				[bvc showToolsMenuPopup];
+			}
+		}
+	}
+	// Reset transform
+	CALayer *layer = self.layer;
+	CATransform3D currentTransform = layer.sublayerTransform;
+	if (!CATransform3DEqualToTransform(currentTransform, CATransform3DIdentity)) {
+		layer.sublayerTransform = CATransform3DIdentity;
+		CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"sublayerTransform"];
+		animation.fromValue = [NSValue valueWithCATransform3D:currentTransform];
+		animation.toValue = [NSValue valueWithCATransform3D:CATransform3DIdentity];
+		animation.duration = 0.2;
+		animation.removedOnCompletion = YES;
+		[layer addAnimation:animation forKey:@"sublayerTransform"];
+	}
+}
+
+%end
+
+%hook UIScrollViewPanGestureRecognizer
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	UIScrollView *scrollView = self.scrollView;
+	CGPoint contentOffset = scrollView.contentOffset;
+	MainController *mc = (MainController *)UIApp.delegate;
+	BrowserViewController *bvc = mc.activeBVC;
+	WebToolbarController **toolbarController_ = CHIvarRef(bvc, toolbarController_, WebToolbarController *);
+	if (toolbarController_) {
+		allowBackGesture = (contentOffset.x == 0.0f) && (*toolbarController_).backButton.enabled;
+		allowForwardGesture = (contentOffset.x == scrollView.contentSize.width - scrollView.bounds.size.width) && (*toolbarController_).forwardButton.enabled;
+	} else {
+		allowBackGesture = NO;
+		allowForwardGesture = NO;
+	}
+	%orig();
+}
+
+- (void)_centroidMovedTo:(CGPoint)to atTime:(NSTimeInterval)time
+{
+	%orig();
+	[self.scrollView chromeCustomization_updateBackForwardUI];
+}
+
+%end
+
+%hook TabView
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	%orig();
+	NSSet *viewTouches = [event touchesForView:self];
+	if ([viewTouches count] == 1) {
+		UITouch *touch = [viewTouches anyObject];
+		CGPoint point = [touch locationInView:self];
+		if (point.y < -10.0f) {
+			[[self closeButton] sendActionsForControlEvents:UIControlEventTouchUpInside];
 		}
 	}
 }

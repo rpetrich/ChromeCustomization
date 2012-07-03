@@ -18,6 +18,9 @@
     <dict>
       <key>cell</key>
       <string>PSGroupCell</string>
+      <key>footerText</key>
+      <string>Quick side swipes allow cycling through multiple tabs in a single gesture
+Detailed side swipes show page titles and track your finger</string>
     </dict>
     <dict>
       <key>cell</key>
@@ -73,7 +76,9 @@
       <key>cell</key>
       <string>PSGroupCell</string>
       <key>footerText</key>
-      <string>© 2012 Ryan Petrich</string>
+      <string>Swipe up on tab to close
+
+© 2012 Ryan Petrich</string>
     </dict>
   </array>
 </dict>

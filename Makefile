@@ -1,6 +1,6 @@
 TWEAK_NAME = ChromeCustomization
 ChromeCustomization_FILES = Tweak.x
-ChromeCustomization_FRAMEWORKS = Foundation UIKit
+ChromeCustomization_FRAMEWORKS = Foundation UIKit QuartzCore
 
 ADDITIONAL_CFLAGS = -std=c99
 TARGET_IPHONEOS_DEPLOYMENT_VERSION = 5.0
