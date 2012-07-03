@@ -49,6 +49,10 @@
 @interface _UIWebViewScrollView : UIScrollView
 @end
 
+@interface TabView : UIControl
+@property (nonatomic, readonly) UIButton *closeButton;
+@end
+
 static inline id CCSettingValue(NSString *key)
 {
 	return [[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.rpetrich.chromecustomization.plist"] objectForKey:key];
@@ -179,6 +183,23 @@ static inline id CCSettingValue(NSString *key)
 		BrowserViewController *bvc = mc.activeBVC;
 		if (bvc.wantsFullScreenLayout) {
 			[bvc showToolsMenuPopup];
+		}
+	}
+}
+
+%end
+
+%hook TabView
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	%orig();
+	NSSet *viewTouches = [event touchesForView:self];
+	if ([viewTouches count] == 1) {
+		UITouch *touch = [viewTouches anyObject];
+		CGPoint point = [touch locationInView:self];
+		if (point.y < -10.0f) {
+			[[self closeButton] sendActionsForControlEvents:UIControlEventTouchUpInside];
 		}
 	}
 }
