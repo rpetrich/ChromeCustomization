@@ -2,7 +2,7 @@ Package: com.rpetrich.chromecustomization
 Priority: optional
 Section: System
 Architecture: iphoneos-arm
-Version: 0.1
+Version: 0.2
 Description: Customize the Chrome browser
 Name: ChromeCustomization
 Depends: firmware (>= 5), mobilesubstrate, preferenceloader (>= 2)
