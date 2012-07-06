@@ -343,3 +343,159 @@ static BOOL allowForwardGesture;
 }
 
 %end
+
+static NSDictionary *hostnameMap;
+
+@interface ChromeCustomizationBlockProtocol : NSURLProtocol
+@end
+
+@implementation ChromeCustomizationBlockProtocol
+
+
++ (BOOL)canInitWithRequest:(NSURLRequest *)request
+{
+	// Allow all frame loads to go through, be concerned only with assets
+	NSString *accept = [request valueForHTTPHeaderField:@"Accept"];
+	if ([accept hasPrefix:@"text/html,"])
+		return NO;
+	// Load all requests that don't have a referer
+	NSString *referer = [request valueForHTTPHeaderField:@"Referer"];
+	if (![referer length])
+		return NO;
+	NSString *refererHost = [[NSURL URLWithString:referer] host];
+	// Load all requests to the same hostname
+	NSString *requestHost = request.URL.host;
+	if ([refererHost isEqualToString:requestHost])
+		return NO;
+	// Lookup request host data by recursively removing the first domain component
+	NSString *currentRequestHost = requestHost;
+	NSDictionary *requestHostData;
+	for (;;) {
+		requestHostData = [hostnameMap objectForKey:currentRequestHost];
+		if (requestHostData)
+			break;
+		NSInteger index = [currentRequestHost rangeOfString:@"."].location;
+		if (index == NSNotFound)
+			return NO;
+		currentRequestHost = [currentRequestHost substringFromIndex:index + 1];
+	}
+	// Allow contacting sister domains, even if they would normally block
+	if ([requestHostData objectForKey:referer])
+		return NO;
+	NSLog(@"ChromeCustomization: Blocked %@ from %@", refererHost, requestHost);
+	return YES;
+}
+
++ (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request
+{
+    // Requests are only canonical with respect to themselves
+    return [[request copy] autorelease];
+}
+
++ (BOOL) requestIsCacheEquivalent:(NSURLRequest *)a toRequest:(NSURLRequest *)b
+{
+    return [a isEqual:b];
+}
+
+- (void)startLoading
+{
+	[self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCannotFindHost userInfo:nil]];
+}
+
+- (void)stopLoading
+{
+}
+
+@end
+
+%hook UIApplication
+
+- (void)_reportAppLaunchFinished
+{
+	NSDictionary *blank = [NSDictionary dictionary];
+	NSDictionary *facebook = [NSDictionary dictionaryWithObjectsAndKeys:
+		(id)kCFBooleanTrue, @"facebook.com",
+		(id)kCFBooleanTrue, @"fbcdn.net",
+		nil];
+	NSDictionary *twitter = [NSDictionary dictionaryWithObject:(id)kCFBooleanTrue forKey:@"twitter.com"];
+	NSDictionary *meebo = [NSDictionary dictionaryWithObject:(id)kCFBooleanTrue forKey:@"meebo.com"];
+	NSDictionary *chartbeat = [NSDictionary dictionaryWithObject:(id)kCFBooleanTrue forKey:@"chartbeat.com"];
+	NSDictionary *postup = [NSDictionary dictionaryWithObject:(id)kCFBooleanTrue forKey:@"tweetup.com"];
+	NSDictionary *conduit = [NSDictionary dictionaryWithObject:(id)kCFBooleanTrue forKey:@"conduit.com"];
+	NSDictionary *addthis = [NSDictionary dictionaryWithObject:(id)kCFBooleanTrue forKey:@"addthis.com"];
+	NSDictionary *woopra = [NSDictionary dictionaryWithObject:(id)kCFBooleanTrue forKey:@"woopra.com"];
+	NSDictionary *getclicky = [NSDictionary dictionaryWithObject:(id)kCFBooleanTrue forKey:@"getclicky.com"];
+	NSDictionary *linkedin = [NSDictionary dictionaryWithObject:(id)kCFBooleanTrue forKey:@"linkedin.com"];
+	NSDictionary *dzone = [NSDictionary dictionaryWithObject:(id)kCFBooleanTrue forKey:@"dzone.com"];
+	hostnameMap = [[NSDictionary dictionaryWithObjectsAndKeys:
+		facebook, @"facebook.com",
+		facebook, @"facebook.net",
+		facebook, @"fbcdn.net",
+		blank, @"fbshare.me",
+		twitter, @"platform.twitter.com",
+		twitter, @"twitter.com",
+		blank, @"disqus.com",
+		blank, @"digg.com",
+		meebo, @"meebo.com",
+		meebo, @"meebocdn.net",
+		blank, @"publitweet.com",
+		blank, @"lijit.com",
+		chartbeat, @"chartbeat.com",
+		chartbeat, @"chartbeat.net",
+		blank, @"causes.com",
+		postup, @"tweetup.com",
+		postup, @"postup.com",
+		conduit, @"conduit.com",
+		conduit, @"conduit-banners.com",
+		blank, @"quantserve.com",
+		blank, @"google-analytics.com",
+  		blank, @"gravatar.com",
+		blank, @"google.com/buzz",
+		blank, @"google.com/cse",
+		blank, @"google.com/friendconnect",
+		blank, @"stats.wordpress.com",
+		blank, @"scorecardresearch.com",
+		blank, @"speakertext.com",
+		blank, @"snap.com" ,
+		blank, @"snapabug.com",
+		blank, @"revsci.net",
+		blank, @"badgeville.com",
+		blank, @"chomp.com",
+		blank, @"wibiya.com",
+		addthis, @"addthis.com",
+		addthis, @"addthiscdn.com",
+		woopra, @"woopra.com",
+		woopra, @"woopra-ns.com",
+		blank, @"apture.com/js/apture.js",
+		blank, @"js-kit.com",
+		blank, @"yaptor.com",
+		blank, @"tweetmeme.com",
+		getclicky, @"get-clicky.com",
+		getclicky, @"getclicky.com",
+		blank, @"fmpub.net",
+		blank, @"typekit.com",
+		blank, @"buysellads.com",
+		blank, @"sharethis.com",
+		blank, @"outbrain.com",
+		blank, @"adtech.us",
+		blank, @"mar.gy",
+		blank, @"mixpanel.com",
+		blank, @"kissmetrics.com",
+		blank, @"viglink.com",
+		blank, @"fyre.co",
+		blank, @"assistly.com",
+		blank, @"stumbleupon.com",
+		blank, @"delicious.com",
+		blank, @"uservoice.com",
+		linkedin, @"platform.linkedin.com",
+		dzone, @"widgets.dzone.com",
+		blank, @"envolve.com",
+		blank, @"vkontakte.ru",
+		blank, @"apis.google.com/js/plusone",
+		blank, @"amung.us",
+		nil] retain];
+	[ChromeCustomizationBlockProtocol registerClass:[ChromeCustomizationBlockProtocol class]];
+	%orig;
+}
+
+%end
