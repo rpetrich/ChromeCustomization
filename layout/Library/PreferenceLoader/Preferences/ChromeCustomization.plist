@@ -9,7 +9,7 @@
     <key>cell</key>
     <string>PSLinkCell</string>
     <key>icon</key>
-    <string>/Applications/Preferences.app/Safari.png</string>
+    <string>/Library/PreferenceLoader/Preferences/ChromeCustomization.png</string>
     <key>label</key>
     <string>ChromeCustomization</string>
   </dict>
