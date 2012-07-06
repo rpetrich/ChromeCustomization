@@ -345,6 +345,7 @@ static BOOL allowForwardGesture;
 %end
 
 static NSDictionary *hostnameMap;
+static BOOL antisocial;
 
 @interface ChromeCustomizationBlockProtocol : NSURLProtocol
 @end
@@ -354,6 +355,8 @@ static NSDictionary *hostnameMap;
 
 + (BOOL)canInitWithRequest:(NSURLRequest *)request
 {
+	if (!antisocial)
+		return NO;
 	// Allow all frame loads to go through, be concerned only with assets
 	NSString *accept = [request valueForHTTPHeaderField:@"Accept"];
 	if ([accept hasPrefix:@"text/html,"])
@@ -501,3 +504,27 @@ static NSDictionary *hostnameMap;
 }
 
 %end
+
+static void ReloadSettings(void)
+{
+	NSDictionary *settings = [[NSDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.rpetrich.chromecustomization.plist"];
+	antisocial = [[settings objectForKey:@"CCAntisocial"] boolValue];
+	[settings release];
+}
+
+static void SettingsChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo)
+{
+	BOOL oldAntisocial = antisocial;
+	ReloadSettings();
+	if (oldAntisocial != antisocial) {
+		[[NSURLCache sharedURLCache] removeAllCachedResponses];
+	}
+}
+
+%ctor {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	%init();
+	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, SettingsChangedCallback, CFSTR("com.rpetrich.chromecustomization.settingschange"), NULL, CFNotificationSuspensionBehaviorCoalesce); 
+	ReloadSettings();
+	[pool drain];
+}

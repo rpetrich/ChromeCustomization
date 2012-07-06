@@ -76,6 +76,26 @@ Detailed side swipes show page titles and track your finger</string>
       <key>cell</key>
       <string>PSGroupCell</string>
       <key>footerText</key>
+      <string>Suppress sharing widgets and other social annoyances</string>
+    </dict>
+    <dict>
+      <key>cell</key>
+      <string>PSSwitchCell</string>
+      <key>default</key>
+      <false/>
+      <key>defaults</key>
+      <string>com.rpetrich.chromecustomization</string>
+      <key>key</key>
+      <string>CCAntisocial</string>
+      <key>label</key>
+      <string>Antisocial</string>
+      <key>PostNotification</key>
+      <string>com.rpetrich.chromecustomization.settingschange</string>
+    </dict>
+    <dict>
+      <key>cell</key>
+      <string>PSGroupCell</string>
+      <key>footerText</key>
       <string>Swipe up on tab to close
 Swipe left on page to go back, right on page to go forward
 
