@@ -433,6 +433,18 @@ __attribute__((visibility("hidden")))
 	NSDictionary *getclicky = [NSDictionary dictionaryWithObject:(id)kCFBooleanTrue forKey:@"getclicky.com"];
 	NSDictionary *linkedin = [NSDictionary dictionaryWithObject:(id)kCFBooleanTrue forKey:@"linkedin.com"];
 	NSDictionary *dzone = [NSDictionary dictionaryWithObject:(id)kCFBooleanTrue forKey:@"dzone.com"];
+	NSDictionary *facebook = [NSDictionary dictionaryWithObjectsAndKeys:
+		(id)kCFBooleanTrue, @"google.com",
+		(id)kCFBooleanTrue, @"google.net",
+		(id)kCFBooleanTrue, @"google.org",
+		(id)kCFBooleanTrue, @"google.ca",
+		(id)kCFBooleanTrue, @"google.co.jp",
+		(id)kCFBooleanTrue, @"adwords.net",
+		(id)kCFBooleanTrue, @"adsense.com",
+		(id)kCFBooleanTrue, @"picasa.com",
+		(id)kCFBooleanTrue, @"android.com",
+		(id)kCFBooleanTrue, @"doubleclick.com",
+		nil];
 	hostnameMap = [[NSDictionary dictionaryWithObjectsAndKeys:
 		facebook, @"facebook.com",
 		facebook, @"facebook.net",
@@ -454,11 +466,8 @@ __attribute__((visibility("hidden")))
 		conduit, @"conduit.com",
 		conduit, @"conduit-banners.com",
 		blank, @"quantserve.com",
-		blank, @"google-analytics.com",
+		google, @"google-analytics.com",
   		blank, @"gravatar.com",
-		blank, @"google.com/buzz",
-		blank, @"google.com/cse",
-		blank, @"google.com/friendconnect",
 		blank, @"stats.wordpress.com",
 		blank, @"scorecardresearch.com",
 		blank, @"speakertext.com",
@@ -472,7 +481,7 @@ __attribute__((visibility("hidden")))
 		addthis, @"addthiscdn.com",
 		woopra, @"woopra.com",
 		woopra, @"woopra-ns.com",
-		blank, @"apture.com/js/apture.js",
+		blank, @"apture.com",
 		blank, @"js-kit.com",
 		blank, @"yaptor.com",
 		blank, @"tweetmeme.com",
@@ -497,7 +506,7 @@ __attribute__((visibility("hidden")))
 		dzone, @"widgets.dzone.com",
 		blank, @"envolve.com",
 		blank, @"vkontakte.ru",
-		blank, @"apis.google.com/js/plusone",
+		google, @"apis.google.com",
 		blank, @"amung.us",
 		nil] retain];
 	[ChromeCustomizationBlockProtocol registerClass:[ChromeCustomizationBlockProtocol class]];
