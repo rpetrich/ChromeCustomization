@@ -347,6 +347,7 @@ static BOOL allowForwardGesture;
 static NSDictionary *hostnameMap;
 static BOOL antisocial;
 
+__attribute__((visibility("hidden")))
 @interface ChromeCustomizationBlockProtocol : NSURLProtocol
 @end
 
