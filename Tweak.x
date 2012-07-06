@@ -369,9 +369,11 @@ static NSDictionary *hostnameMap;
 		return NO;
 	// Lookup request host data by recursively removing the first domain component
 	NSString *currentRequestHost = requestHost;
+	if (!currentRequestHost)
+		return NO;
 	NSDictionary *requestHostData;
 	for (;;) {
-		requestHostData = [hostnameMap objectForKey:currentRequestHost];
+		requestHostData = (NSDictionary *)CFDictionaryGetValue((CFDictionaryRef)hostnameMap, currentRequestHost);
 		if (requestHostData)
 			break;
 		NSInteger index = [currentRequestHost rangeOfString:@"."].location;
@@ -380,7 +382,7 @@ static NSDictionary *hostnameMap;
 		currentRequestHost = [currentRequestHost substringFromIndex:index + 1];
 	}
 	// Allow contacting sister domains, even if they would normally block
-	if ([requestHostData objectForKey:referer])
+	if (CFDictionaryGetValue((CFDictionaryRef)requestHostData, referer))
 		return NO;
 	NSLog(@"ChromeCustomization: Blocked %@ from %@", refererHost, requestHost);
 	return YES;
