@@ -163,14 +163,16 @@ static inline NSInteger CCFindCharacter(CFStringInlineBuffer *buffer, NSRange se
 	NSString *host = [[url host] lowercaseString];
 	NSString *previousHost = host;
 	NSMutableSet *result = [NSMutableSet set];
-	[result addObject:host];
 	NSRange range = (NSRange){ 0, [host length] };
+	if (range.length == 0)
+		return result;
 	CFStringInlineBuffer buffer;
 	CFStringInitInlineBuffer((CFStringRef)host, &buffer, (CFRange){ 0, range.length });
 	NSInteger index;
 	while ((index = CCFindCharacter(&buffer, range, '.')) != NSNotFound) {
 		// Only add the previous host so that we always skip the tld
-		[result addObject:previousHost];
+		if (previousHost)
+			[result addObject:previousHost];
 		range.length = (range.length + range.location) - (index + 1);
 		range.location = index + 1;
 		previousHost = [host substringWithRange:range];
@@ -178,7 +180,7 @@ static inline NSInteger CCFindCharacter(CFStringInlineBuffer *buffer, NSRange se
 			break;
 	}
 	// Special case to not consider co.<tld> a host variant for *.co.<tld>
-	if ([previousHost length] <= 3) {
+	if (previousHost && ([previousHost length] <= 3)) {
 		[result removeObject:[@"co." stringByAppendingString:previousHost]];
 	}
 	return result;
@@ -198,12 +200,12 @@ static inline NSInteger CCFindCharacter(CFStringInlineBuffer *buffer, NSRange se
 {
 	NSString *urlString = [url absoluteString];
 	for (NSString *hostVariant in [self hostVariantsForURL:url]) {
-		NSSet *allowedRules = [allowedDomainRules objectForKey:hostVariant];
+		NSSet *allowedRules = (NSSet *)CFDictionaryGetValue((CFDictionaryRef)allowedDomainRules, hostVariant);
 		if ([self URLString:urlString matchesRuleInSet:allowedRules])
 			return YES;
 		if ([blockedDomains containsObject:hostVariant])
 			return NO;
-		NSSet *localBlockedRules = [blockedDomainRules objectForKey:hostVariant];
+		NSSet *localBlockedRules = (NSSet *)CFDictionaryGetValue((CFDictionaryRef)blockedDomainRules, hostVariant);
 		if ([self URLString:urlString matchesRuleInSet:localBlockedRules])
 			return NO;
 	}
