@@ -158,7 +158,7 @@ static inline NSInteger CCFindCharacter(CFStringInlineBuffer *buffer, NSRange se
 	[super dealloc];
 }
 
-- (NSSet *)hostVariantsForURL:(NSURL *)url
++ (NSSet *)hostVariantsForURL:(NSURL *)url
 {
 	NSString *host = [[url host] lowercaseString];
 	NSString *previousHost = host;
@@ -190,6 +190,15 @@ static inline NSInteger CCFindCharacter(CFStringInlineBuffer *buffer, NSRange se
 	return result;
 }
 
++ (BOOL)URL:(NSURL *)URL sharesDomainWithURL:(NSURL *)otherURL
+{
+	NSSet *hostVariants = [self hostVariantsForURL:otherURL];
+	for (NSString *host in [self hostVariantsForURL:URL])
+		if ([hostVariants containsObject:host])
+			return YES;
+	return NO;
+}
+
 - (BOOL)URLString:(NSString *)urlString matchesRuleInSet:(NSSet *)rules
 {
 	if (!urlString)
@@ -203,7 +212,7 @@ static inline NSInteger CCFindCharacter(CFStringInlineBuffer *buffer, NSRange se
 - (BOOL)URLPassesFilter:(NSURL *)url
 {
 	NSString *urlString = [url absoluteString];
-	for (NSString *hostVariant in [self hostVariantsForURL:url]) {
+	for (NSString *hostVariant in [CCTrackingPrivacyList hostVariantsForURL:url]) {
 		NSSet *allowedRules = (NSSet *)CFDictionaryGetValue((CFDictionaryRef)allowedDomainRules, hostVariant);
 		if ([self URLString:urlString matchesRuleInSet:allowedRules])
 			return YES;

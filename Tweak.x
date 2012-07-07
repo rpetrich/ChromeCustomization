@@ -354,10 +354,13 @@ static NSArray *privacyLists;
 - (NSURLRequest *)webView:(WebView *)sender resource:(id)identifier willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)redirectResponse fromDataSource:(WebDataSource *)dataSource
 {
 	NSURL *URL = request.URL;
-	for (CCTrackingPrivacyList *privacyList in privacyLists) {
-		if (![privacyList URLPassesFilter:URL]) {
-			NSLog(@"ChromeCustomization: URL blocked: %@", URL);
-			return nil;
+	NSURL *frameURL = [[[[dataSource webFrame] dataSource] response] URL];
+	if (![CCTrackingPrivacyList URL:URL sharesDomainWithURL:frameURL]) {
+		for (CCTrackingPrivacyList *privacyList in privacyLists) {
+			if (![privacyList URLPassesFilter:URL]) {
+				NSLog(@"ChromeCustomization: URL blocked: %@", URL);
+				return nil;
+			}
 		}
 	}
 	return %orig();

@@ -8,6 +8,7 @@ __attribute__((visibility("hidden")))
 	NSSet *blockedDomains;
 	NSSet *blockedRules;
 }
++ (BOOL)URL:(NSURL *)URL sharesDomainWithURL:(NSURL *)otherURL;
 - (id)initWithContentsOfFile:(NSString *)filePath;
 - (BOOL)URLPassesFilter:(NSURL *)url;
 @end
