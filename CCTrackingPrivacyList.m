@@ -182,6 +182,10 @@ static inline NSInteger CCFindCharacter(CFStringInlineBuffer *buffer, NSRange se
 	// Special case to not consider co.<tld> a host variant for *.co.<tld>
 	if (previousHost && ([previousHost length] <= 3)) {
 		[result removeObject:[@"co." stringByAppendingString:previousHost]];
+		// And other weird cases like .ar that only give out *.com.ar and whatnot
+		[result removeObject:[@"com." stringByAppendingString:previousHost]];
+		[result removeObject:[@"net." stringByAppendingString:previousHost]];
+		[result removeObject:[@"org." stringByAppendingString:previousHost]];
 	}
 	return result;
 }
