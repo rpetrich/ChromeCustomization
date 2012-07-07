@@ -1,5 +1,5 @@
 TWEAK_NAME = ChromeCustomization
-ChromeCustomization_FILES = Tweak.x
+ChromeCustomization_FILES = Tweak.x CCTrackingPrivacyList.m
 ChromeCustomization_FRAMEWORKS = Foundation UIKit QuartzCore
 
 ADDITIONAL_CFLAGS = -std=c99

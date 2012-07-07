@@ -1,0 +1,81 @@
+msFilterList
+# Twitter
+-d platform.twitter.com
+-d api.twitter.com
+# Google
+-d apis.google.com /js/plusone
+-d google.com /buzz
+-d google.com /cse
+-d google.com /friendconnect
+# Facebook
+-d facebook.com
+-d facebook.net
+-d fbcdn.net
+# Disqus
+-d disqus.com
+# Digg
+-d digg.com
+# Meebo
+-d meebo.com
+-d meebocdn.net
+# PubliTweet
+-d publitweet.com
+# Causes.com
+-d causes.com
+# PostUp
+-d tweetup.com
+-d postup.com
+# Gravatar
+-d gravatar.com
+# Snapshots
+-d snap.com
+# Snapengage
+-d snapabug.com
+-d snapengage.com
+# AudienceScience
+-d revsci.net
+# Badgeville
+-d badgeville.com
+# Chomp
+-d chomp.com
+# Conduit
+-d wibiya.com
+-d conduit.com
+# AddThis
+-d addthis.com
+-d addthiscdn.com
+# Apture
+-d apture.com
+# JSKit
+-d js-kit.com
+# Tweetmeme
+-d tweetmeme.com
+# Federated Media
+-d fmpub.net
+# TypeKit
+-d typekit.com
+# ShareThis
+-d sharethis.com
+# OutBrain
+-d outbrain.com
+# Marginize
+-d mar.gy
+# Vigilink
+-d viglink.com
+# StumbleUpon
+-d stumbleupon.com
+# Delicious
+-d delicious.com
+# UserVoice
+-d uservoice.com
+# LinkedIn
+-d platform.linkedin.com
+# DZone
+-d widgets.dzone.com
+# Envolve
+-d envolve.com
+# VK
+-d vkontakte.ru
+-d vk.com
+# Who's Amung Us
+-d amung.us

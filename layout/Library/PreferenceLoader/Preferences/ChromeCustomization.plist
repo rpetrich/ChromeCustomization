@@ -75,8 +75,10 @@ Detailed side swipes show page titles and track your finger</string>
     <dict>
       <key>cell</key>
       <string>PSGroupCell</string>
+      <key>label</key>
+      <string>Block Lists</string>
       <key>footerText</key>
-      <string>Suppress sharing widgets and other social annoyances</string>
+      <string>Suppress tracking, some ads, social widgets and other annoyances</string>
     </dict>
     <dict>
       <key>cell</key>
@@ -86,11 +88,25 @@ Detailed side swipes show page titles and track your finger</string>
       <key>defaults</key>
       <string>com.rpetrich.chromecustomization</string>
       <key>key</key>
-      <string>CCAntisocial</string>
+      <string>CCEnableList-antisocial</string>
       <key>label</key>
       <string>Antisocial</string>
       <key>PostNotification</key>
-      <string>com.rpetrich.chromecustomization.settingschange</string>
+      <string>com.rpetrich.chromecustomization.privacysettingschange</string>
+    </dict>
+    <dict>
+      <key>cell</key>
+      <string>PSSwitchCell</string>
+      <key>default</key>
+      <false/>
+      <key>defaults</key>
+      <string>com.rpetrich.chromecustomization</string>
+      <key>key</key>
+      <string>CCEnableList-easyprivacy</string>
+      <key>label</key>
+      <string>EasyPrivacy</string>
+      <key>PostNotification</key>
+      <string>com.rpetrich.chromecustomization.privacysettingschange</string>
     </dict>
     <dict>
       <key>cell</key>
