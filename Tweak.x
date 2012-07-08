@@ -269,6 +269,8 @@ static BOOL allowForwardGesture;
 - (void)_endPanWithEvent:(id)event
 {
 	%orig();
+	// Sending the back event can cause the web view to be deallocated. Yikes!
+	[[self retain] autorelease];
 	CGPoint offset = self.contentOffset;
 	UIWebView *webView = (UIWebView *)self.superview;
 	if ([webView isKindOfClass:[UIWebView class]]) {
