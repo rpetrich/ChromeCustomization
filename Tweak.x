@@ -89,6 +89,26 @@ static inline id CCSettingValue(NSString *key)
 	return [[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.rpetrich.chromecustomization.plist"] objectForKey:key];
 }
 
+static UIButton *WebToolbarControllerGetBackButton(WebToolbarController *tbc)
+{
+	if ([tbc respondsToSelector:@selector(backButton)])
+		return [tbc backButton];
+	UIButton **button = CHIvarRef(tbc, backButton_, UIButton *);
+	if (button)
+		return *button;
+	return nil;
+}
+
+static UIButton *WebToolbarControllerGetForwardButton(WebToolbarController *tbc)
+{
+	if ([tbc respondsToSelector:@selector(forwardButton)])
+		return [tbc forwardButton];
+	UIButton **button = CHIvarRef(tbc, forwardButton_, UIButton *);
+	if (button)
+		return *button;
+	return nil;
+}
+
 %hook BrowserViewController
 
 - (void)handleiPhoneSwipe:(UIGestureRecognizer *)recognizer
@@ -278,9 +298,9 @@ static BOOL allowForwardGesture;
 		BrowserViewController *bvc = mc.activeBVC;
 		WebToolbarController **toolbarController_ = CHIvarRef(bvc, toolbarController_, WebToolbarController *);
 		if (allowBackGesture && (offset.x < - kNavigationGestureThreshold)) {
-			[(*toolbarController_).backButton sendActionsForControlEvents:UIControlEventTouchUpInside];
+			[WebToolbarControllerGetBackButton(*toolbarController_) sendActionsForControlEvents:UIControlEventTouchUpInside];
 		} else if (allowForwardGesture && (offset.x > self.contentSize.width - self.bounds.size.width + kNavigationGestureThreshold)) {
-			[(*toolbarController_).forwardButton sendActionsForControlEvents:UIControlEventTouchUpInside];
+			[WebToolbarControllerGetForwardButton(*toolbarController_) sendActionsForControlEvents:UIControlEventTouchUpInside];
 		} else if (offset.y < 0.0f) {
 			MainController *mc = (MainController *)UIApp.delegate;
 			BrowserViewController *bvc = mc.activeBVC;
@@ -316,8 +336,8 @@ static BOOL allowForwardGesture;
 	WebToolbarController **toolbarController_ = CHIvarRef(bvc, toolbarController_, WebToolbarController *);
 	if (toolbarController_) {
 		WebToolbarController *tb = *toolbarController_;
-		allowBackGesture = (contentOffset.x == 0.0f) && [tb respondsToSelector:@selector(backButton)] && tb.backButton.enabled;
-		allowForwardGesture = (contentOffset.x == scrollView.contentSize.width - scrollView.bounds.size.width) && [tb respondsToSelector:@selector(forwardButton)] && tb.forwardButton.enabled;
+		allowBackGesture = (contentOffset.x == 0.0f) && WebToolbarControllerGetBackButton(tb).enabled;
+		allowForwardGesture = (contentOffset.x == scrollView.contentSize.width - scrollView.bounds.size.width) && WebToolbarControllerGetForwardButton(tb).enabled;
 	} else {
 		allowBackGesture = NO;
 		allowForwardGesture = NO;
