@@ -315,8 +315,9 @@ static BOOL allowForwardGesture;
 	BrowserViewController *bvc = mc.activeBVC;
 	WebToolbarController **toolbarController_ = CHIvarRef(bvc, toolbarController_, WebToolbarController *);
 	if (toolbarController_) {
-		allowBackGesture = (contentOffset.x == 0.0f) && (*toolbarController_).backButton.enabled;
-		allowForwardGesture = (contentOffset.x == scrollView.contentSize.width - scrollView.bounds.size.width) && (*toolbarController_).forwardButton.enabled;
+		WebToolbarController *tb = *toolbarController_;
+		allowBackGesture = (contentOffset.x == 0.0f) && [tb respondsToSelector:@selector(backButton)] && tb.backButton.enabled;
+		allowForwardGesture = (contentOffset.x == scrollView.contentSize.width - scrollView.bounds.size.width) && [tb respondsToSelector:@selector(forwardButton)] && tb.forwardButton.enabled;
 	} else {
 		allowBackGesture = NO;
 		allowForwardGesture = NO;
