@@ -3,6 +3,8 @@
 #import <UIKit/UIKit2.h>
 #import <WebKit/WebKit.h>
 #import <CaptainHook/CaptainHook.h>
+#import <CoreFoundation/CFUserNotification.h>
+#import <notify.h>
 
 @interface BrowserViewController : UIViewController
 @property (nonatomic, retain) UIView *contentArea;
@@ -415,10 +417,35 @@ static void PrivacySettingsChangedCallback(CFNotificationCenterRef center, void 
 	ReloadSettings();
 }
 
+static int unsupportedVersionCheck;
+
+static void UnsupportedVersionCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo)
+{
+	uint64_t version = 0;
+	notify_get_state(unsupportedVersionCheck, &version);
+	CFUserNotificationCreate(kCFAllocatorDefault, 0, kCFUserNotificationPlainAlertLevel, NULL, (CFDictionaryRef)[NSDictionary dictionaryWithObjectsAndKeys:
+		@"ChromeCustomization", (id)kCFUserNotificationAlertHeaderKey,
+		[NSString stringWithFormat:@"Chrome M%d has not been certified to work with this version of ChromeCustomization and may not behave correctly.", version], kCFUserNotificationAlertMessageKey,
+		nil]);
+}
+
 %ctor {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, PrivacySettingsChangedCallback, CFSTR("com.rpetrich.chromecustomization.privacysettingschange"), NULL, CFNotificationSuspensionBehaviorCoalesce); 
-	ReloadSettings();
-	%init();
+	if (objc_getClass("SpringBoard")) {
+		CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, UnsupportedVersionCallback, CFSTR("com.rpetrich.chromecustomization.unsupportedversion"), NULL, CFNotificationSuspensionBehaviorCoalesce); 
+		notify_register_check("com.rpetrich.chromecustomization.unsupportedversion", &unsupportedVersionCheck);
+	} else {
+		ReloadSettings();
+		CFBundleRef mainBundle = CFBundleGetMainBundle();
+		CFPropertyListRef version = CFBundleGetValueForInfoDictionaryKey(mainBundle, CFSTR("CFBundleShortVersionString")) ?: CFBundleGetValueForInfoDictionaryKey(mainBundle, CFSTR("CFBundleVersion")) ?: CFSTR("1");
+		NSInteger versionValue = [(id)version integerValue];
+		if ([(id)version intValue] > 25) {
+			notify_register_check("com.rpetrich.chromecustomization.unsupportedversion", &unsupportedVersionCheck);
+			notify_set_state(unsupportedVersionCheck, versionValue);
+			notify_post("com.rpetrich.chromecustomization.unsupportedversion");
+		}
+		CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, PrivacySettingsChangedCallback, CFSTR("com.rpetrich.chromecustomization.privacysettingschange"), NULL, CFNotificationSuspensionBehaviorCoalesce); 
+		%init();
+	}
 	[pool drain];
 }
